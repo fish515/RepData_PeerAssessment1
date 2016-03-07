@@ -1,25 +1,103 @@
 ---
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
+title: "Repro Research Course Project 1"
+author: "Hongyu Shen"
+date: "2016年3月6日"
+output: html_document
 ---
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
 
-## Loading and preprocessing the data
+## Introduction
 
+This assignment is the first peer assessment of coursera Reproducible Research course. 
 
+####First is to load basic packages.
 
-## What is mean total number of steps taken per day?
+```{r library,echo=TRUE}
+library(ggplot2)
+```
 
+Then is to load the data got forom the GitHub repository. The file should be unzipped and in the same folder as the working directory.
+```{r data, datetime ,echo=TRUE}
+data<-read.csv("activity.csv",na.strings = "NA")
+```
 
+#### Mean total number of steps taken per day.
+Find the sum of the number of steps taken per day.And also remove the NA.
+```{r sum_steps,echo=TRUE}
+sum_steps <- aggregate(data$steps, by=list(data$date), FUN=sum, na.rm=TRUE)
+names(sum_steps)<-c("date","steps")
+head(sum_steps)
+```
+Plot the histogram
 
-## What is the average daily activity pattern?
+```{r hist,echo=TRUE}
+hist(sum_steps$steps,breaks=8,main="Histogram of the total number of steps taken per day",xlab = "Number of steps taken per day",ylab = "Frequency",col="red")
+```
+Then the mean and median of the total number of steps taken per day:
 
+```{r mean and median,echo=TRUE}
+mean(sum_steps$steps)
+median(sum_steps$steps)
+```
+The mean of the steps taken per day is 9354 and the median of the steps taken per day is 10395
 
+####The average daily activity pattern
 
-## Imputing missing values
+Make a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)
 
+First is to aggregate a new data sets
+```{r ave_steps,echo=TRUE}
+ave_steps <- aggregate(data$steps, by=list(data$interval), FUN=sum, na.rm=TRUE)
+names(ave_steps)<-c("interval","steps")
+head(ave_steps)
+```
+Plot the graph
+```{r plot,echo=TRUE}
+plot(ave_steps$interval,ave_steps$steps,type="l",xlab = "5-min interval",ylab="the average number of stepps", main="average daily activity pattern")
+```
 
+Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
 
-## Are there differences in activity patterns between weekdays and weekends?
+```{r max,echo=TRUE}
+# find the position of the max
+max_pos <- which(ave_steps$steps == max(ave_steps$steps))
+max_interval<-ave_steps[max_pos,1]
+```
+And it turns out that 835 5-min interval, contains the maximum number of steps.
+
+####Inputing the missing values
+
+Calculate and report the total number of missing values in the dataset (i.e. the total number of rows with NAs)
+```{r na,echo=TRUE}
+sum(is.na(data))
+```
+And the number of NA is 2304.
+
+Devise a strategy for filling in all of the missing values in the dataset. The strategy does not need to be sophisticated. For example, you could use the mean/median for that day, or the mean for that 5-minute interval, etc.
+
+Find the NA postion and find the means
+```{r napos,echo=TRUE}
+na_pos<-which(is.na(data$steps))
+mean_vec <- rep(mean(data$steps, na.rm=TRUE), times=length(na_pos))
+```
+Create a new dataset that is equal to the original dataset but with the missing data filled in.
+
+```{r na-data,echo=TRUE}
+data[na_pos,"steps"]<-mean_vec
+head(data)
+```
+Make a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day. Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?
+```{r sum_2,echo=TRUE}
+sum_steps <- aggregate(data$steps, by=list(data$date), FUN=sum, na.rm=TRUE)
+names(sum_steps)<-c("date","steps")
+head(sum_steps)
+```
+Plot the histogram
+
+```{r hist2,echo=TRUE}
+hist(sum_steps$steps,breaks=8,main="Histogram of the total number of steps taken per day",xlab = "Number of steps taken per day",ylab = "Frequency",col="red")
+```
+
