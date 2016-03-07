@@ -100,4 +100,24 @@ Plot the histogram
 ```{r hist2,echo=TRUE}
 hist(sum_steps$steps,breaks=8,main="Histogram of the total number of steps taken per day",xlab = "Number of steps taken per day",ylab = "Frequency",col="red")
 ```
+####Are there differences in activity patterns between weekdays and weekends?
+First is to convert the date to factor and then apply weekdays()
+```{r date2fact,echo=TRUE}
+data$date<-as.POSIXct(data$date,format="%Y-%m-%d")
+data<-data.frame(data,weekdays=weekdays(data$date))
+levels(data$weekdays)
+```
+From the levels, we can see that the weekdays are presented this form, then I converted Monday to Friday to weekdays.
+```{r weekdays,echo=TRUE}
+levels(data$weekdays)<-list(weekday = c("Monday", "Tuesday", "Wednesday",  "Thursday", "Friday"),weekend = c("Saturday", "Sunday"))
+```
+Make a panel plot containing a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis).
+```{r panel,echo=TRUE}
+mean_data <- aggregate(data$steps, by=list( data$weekday, data$interval), mean)
+names(mean_data) <- c("weekday", "interval", "mean")
+head(mean_data)
+library(lattice)
+xyplot(mean ~ interval | weekday, mean_data, type="l",lwd=1,xlab="Interval",ylab="Averaged Number of steps",layout=c(1,2))
+```
+```
 
